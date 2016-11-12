@@ -9,17 +9,19 @@ import com.rentarosato520.spacefighter.asset.animation.Assets;
 import com.rentarosato520.spacefighter.engine.Handler;
 import com.rentarosato520.spacefighter.entity.EntityObject;
 import com.rentarosato520.spacefighter.entity.GameObject;
+import com.rentarosato520.spacefighter.entity.misc.Meteor;
 import com.rentarosato520.spacefighter.factions.Faction;
 
 public class NpcLaser extends GameObject{
 	private Handler h;
 	private Faction f, ef;
+	private EntityObject firer;
 	private int laserAim;
 	private int currentTarget;
-	private int vectorX, vectorY;
+	private float vectorX, vectorY;
 	private int damage;
 	
-	public NpcLaser(int x, int y, int width, int height, Handler h, Faction f, int targetX, int targetY, int attack) {
+	public NpcLaser(float x, float y, int width, int height, Handler h, Faction f, float targetX, float targetY, int attack, EntityObject firer) {
 		super(x, y, width, height, h);
 		
 		this.x = x;
@@ -31,6 +33,7 @@ public class NpcLaser extends GameObject{
 		this.vectorX = targetX;
 		this.vectorY = targetY;
 		this.damage = attack;
+		this.firer = firer;
 		new Animator();
 		
 		aimAI();
@@ -49,10 +52,18 @@ public class NpcLaser extends GameObject{
 		for(Faction ef : f.isEnemy){
 			for(EntityObject eo : ef.members){
 				if(getBounds().intersects(eo.getBounds())){
-					eo.setDamage(damage);
+					eo.setDamage(damage, firer);
 					h.removeObject(this);
 				}
 			}	
+		}
+		
+		for(GameObject o : h.object){
+			if(this.getBounds().intersects(o.getBounds()) && o instanceof Meteor){
+				Meteor m = (Meteor) o;
+				m.setHealth(damage);
+				h.removeObject(this);
+			}
 		}
 		
 		if(x > Window.screensize.getWidth() + 1200 || x < 0 - 1200){
@@ -91,16 +102,16 @@ public class NpcLaser extends GameObject{
 		}
 		
 		if(laserAim == 0){
-			g.drawImage(Assets.playerLaser, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 1){
-			g.drawImage(Assets.playerLaser1, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser1,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 2){
-			g.drawImage(Assets.playerLaser2, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser2,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 3){
-			g.drawImage(Assets.playerLaser3, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser3,(int) x,(int) y, width, height, null);
 		}
 	}
 	
@@ -127,6 +138,6 @@ public class NpcLaser extends GameObject{
 
 
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, width, height);
+		return new Rectangle((int) x,(int) y, width, height);
 	}
 }

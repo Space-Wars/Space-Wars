@@ -9,6 +9,7 @@ import com.rentarosato520.spacefighter.asset.animation.Assets;
 import com.rentarosato520.spacefighter.engine.Handler;
 import com.rentarosato520.spacefighter.entity.EntityObject;
 import com.rentarosato520.spacefighter.entity.GameObject;
+import com.rentarosato520.spacefighter.entity.misc.Meteor;
 import com.rentarosato520.spacefighter.entity.ships.Player;
 import com.rentarosato520.spacefighter.factions.Faction;
 
@@ -17,9 +18,10 @@ public class PlayerLaser extends GameObject{
 	private Random r;
 	private Player p;
 	private Faction f, ef;
-	private int shotDam, laserAim;
+	private int shotDam, laserAim/*, pRotate, rotateSec*/;
+	private boolean rotate;
 	
-	public PlayerLaser(int x, int y, int width, int height, Handler h, EntityObject p) {
+	public PlayerLaser(float x, float y, int width, int height, Handler h, EntityObject p, boolean rotate) {
 		super(x, y, width, height, h);
 		this.x = x;
 		this.y = y;
@@ -27,6 +29,8 @@ public class PlayerLaser extends GameObject{
 		this.height = height;
 		this.velY = 0;
 		this.h = h;
+		this.rotate = rotate;
+		//this.pRotate = 0;
 		this.p = (Player) p;
 
 		r = new Random();
@@ -35,34 +39,40 @@ public class PlayerLaser extends GameObject{
 		
 		this.shotDam = r.nextInt(20)+20/5 + Player.pAttack;
 		
-		if(p.getIsFacing() == 0){
-			this.velY = -10;
-		}	
-		if(p.getIsFacing() == 1){
-			this.velY = 10;
+		if(!rotate){
+			if(p.getIsFacing() == 0){
+				this.velY = -10;
+			}	
+			if(p.getIsFacing() == 1){
+				this.velY = 10;
+			}
+			if(p.getIsFacing() == 2){
+				this.velX = 10;
+			}
+			if(p.getIsFacing() == 3){
+				this.velX = -10;
+			}
+			
+			if(p.getIsFacing() == 4){
+				this.velY = 10; 
+				this.velX = -10;
+			}	
+			if(p.getIsFacing() == 5){
+				this.velY = -10; 
+				this.velX = -10;
+			}
+			if(p.getIsFacing() == 6){
+				this.velY = 10; 
+				this.velX = 10;
+			}
+			if(p.getIsFacing() == 7){
+				this.velY = -10; 
+				this.velX = 10;
+			}
 		}
-		if(p.getIsFacing() == 2){
-			this.velX = 10;
-		}
-		if(p.getIsFacing() == 3){
-			this.velX = -10;
-		}
-		
-		if(p.getIsFacing() == 4){
-			this.velY = 10; 
-			this.velX = -10;
-		}	
-		if(p.getIsFacing() == 5){
-			this.velY = -10; 
-			this.velX = -10;
-		}
-		if(p.getIsFacing() == 6){
-			this.velY = 10; 
-			this.velX = 10;
-		}
-		if(p.getIsFacing() == 7){
-			this.velY = -10; 
-			this.velX = 10;
+		if(rotate){
+			this.velX = (float) this.p.getShotVelX();
+			this.velY = (float) this.p.getShotVelY();
 		}
 	}
 
@@ -71,17 +81,21 @@ public class PlayerLaser extends GameObject{
 		x += velX;
 		y += velY;
 		
-		if(velX == 0 && velY == 0){
-			h.removeObject(this);
-		}
-		
 		for(Faction ef : f.isEnemy){
 			for(EntityObject eo : ef.members){
 				if(getBounds().intersects(eo.getBounds())){
-					eo.setDamage(shotDam);
+					eo.setDamage(shotDam, p);
 					h.removeObject(this);
 				}
 			}	
+		}
+		
+		for(GameObject o : h.object){
+			if(this.getBounds().intersects(o.getBounds()) && o instanceof Meteor){
+				Meteor m = (Meteor) o;
+				m.setHealth(shotDam);
+				h.removeObject(this);
+			}
 		}
 		
 		if(x > Window.screensize.getWidth() + 1200 || x < 0 - 1200){
@@ -116,25 +130,25 @@ public class PlayerLaser extends GameObject{
 		}
 		
 		if(laserAim == 0){
-			g.drawImage(Assets.playerLaser, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 1){
-			g.drawImage(Assets.playerLaser1, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser1,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 2){
-			g.drawImage(Assets.playerLaser2, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser2,(int) x,(int) y, width, height, null);
 		}
 		if(laserAim == 3){
-			g.drawImage(Assets.playerLaser3, x, y, width, height, null);
+			g.drawImage(Assets.playerLaser3,(int) x,(int) y, width, height, null);
 		}
 	}
 
 
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, width, height);
+		return new Rectangle((int)x,(int) y, width, height);
 	}
 	
 	public Rectangle getBounds2(){
-		return new Rectangle(x + 85, y, width, height);
+		return new Rectangle((int)x + 85,(int) y, width, height);
 	}
 }

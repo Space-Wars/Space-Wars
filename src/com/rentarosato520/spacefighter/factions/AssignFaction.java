@@ -25,9 +25,9 @@ public class AssignFaction {
 			ran[i] = r.nextInt(3);
 		}
 		
-		rep[0] = r.nextInt(15)+15;
-		rep[1] = r.nextInt(15)+15;
-		rep[2] = r.nextInt(15)+15;
+		rep[0] = r.nextInt(300);
+		rep[1] = r.nextInt(300);
+		rep[2] = r.nextInt(300);
 		
 		m = new Mercenary(null, rep[0], h);
 		w = new Watchmen(null, rep[1], h);
@@ -41,11 +41,11 @@ public class AssignFaction {
 	}
 
 	public void assign(){
-		if(h.entity.size() < 20){
-			spawnMarauder();
-			spawnMercenary();
-			spawnWatchmen();
-		}
+		//if(h.entity.size() < 50){
+		spawnMarauder();
+		spawnMercenary();
+		spawnWatchmen();
+		//}
 		randomizeSpawn();
 	}
 	
@@ -81,65 +81,64 @@ public class AssignFaction {
 	}
 	
 	public void randomizeSpawn(){
-		
 		if(ran[0] == 1){
-			x = 0 - 1000;
+			x = 0 - 800;
 		}
 		if(ran[0] == 2){
-			x = Window.screensize.width + 1000;
+			x = Window.screensize.width + 800;
 		}
 		if(ran[0] == 0){
-			x = r.nextInt(Window.screensize.width + 1000);
+			x = r.nextInt(Window.screensize.width + 800);
 		}
 
 		if(ran[1] == 1){
-			y = r.nextInt(Window.screensize.height + 1000);
+			y = r.nextInt(Window.screensize.height + 800);
 		}
 		if(ran[1] == 2){
-			y = 0 - 1000;
+			y = 0 - 800;
 		}
 		if(ran[1] == 0){
-			y = Window.screensize.height + 1000;
+			y = Window.screensize.height + 800;
 		}
 		
 		if(ran[2] == 1){
-			xx = 0 - 1000;
+			xx = 0 - 800;
 		}
 		if(ran[2] == 2){
-			xx = Window.screensize.width + 1000;
+			xx = Window.screensize.width + 800;
 		}
 		if(ran[2] == 0){
-			xx = r.nextInt(Window.screensize.width + 1000);
+			xx = r.nextInt(Window.screensize.width + 800);
 		}
 
 		if(ran[3] == 1){
-			yy = r.nextInt(Window.screensize.height + 1000);
+			yy = r.nextInt(Window.screensize.height + 800);
 		}
 		if(ran[3] == 2){
-			yy = 0 - 1000;
+			yy = 0 - 800;
 		}
 		if(ran[3] == 0){
-			yy = Window.screensize.height + 1000;
+			yy = Window.screensize.height + 800;
 		}
 		
 		if(ran[4] == 1){
-			xxx = 0 - 1000;
+			xxx = 0 - 800;
 		}
 		if(ran[4] == 2){
-			xxx = Window.screensize.width + 1000;
+			xxx = Window.screensize.width + 800;
 		}
 		if(ran[4] == 0){
-			xxx = r.nextInt(Window.screensize.width + 1000);
+			xxx = r.nextInt(Window.screensize.width + 800);
 		}
 
 		if(ran[5] == 1){
-			yyy = r.nextInt(Window.screensize.height + 1000);
+			yyy = r.nextInt(Window.screensize.height + 800);
 		}
 		if(ran[5] == 2){
-			yyy = 0 - 1000;
+			yyy = 0 - 800;
 		}
 		if(ran[5] == 0){
-			yyy = Window.screensize.height + 1000;
+			yyy = Window.screensize.height + 800;
 		}
 	}
 

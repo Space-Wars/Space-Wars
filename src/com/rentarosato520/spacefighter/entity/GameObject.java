@@ -6,16 +6,16 @@ import java.awt.Rectangle;
 import com.rentarosato520.spacefighter.engine.Handler;
 
 public abstract class GameObject{
-	protected int x;
-	protected int y;
+	protected float x;
+	protected float y;
 	protected int width;
 	protected int height;
 	protected ID id;
-	protected int velX;
-	protected int velY;
+	protected float velX;
+	protected float velY;
 	protected boolean isCollidingX, isCollidingY;
 	
-	public GameObject(int x, int y, int width, int height, Handler h){
+	public GameObject(float x, float y, int width, int height, Handler h){
 		
 	}
 	
@@ -41,13 +41,13 @@ public abstract class GameObject{
 		this.height = height;
 	}
 
-	public int getX() {
+	public float getX() {
 		return x;
 	}
 	public void setX(int x) {
 		this.x = x;
 	}
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 	public void setY(int y) {
@@ -59,13 +59,13 @@ public abstract class GameObject{
 	public void setId(ID id) {
 		this.id = id;
 	}
-	public int getVelX() {
+	public float getVelX() {
 		return velX;
 	}
 	public void setVelX(int velX) {
 		this.velX = velX;
 	}
-	public int getVelY() {
+	public float getVelY() {
 		return velY;
 	}
 	public void setVelY(int velY) {

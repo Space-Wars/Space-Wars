@@ -12,10 +12,13 @@ import com.rentarosato520.spacefighter.engine.GameMain;
 import com.rentarosato520.spacefighter.engine.HUD;
 import com.rentarosato520.spacefighter.engine.Handler;
 import com.rentarosato520.spacefighter.engine.Spawner;
+import com.rentarosato520.spacefighter.entity.EntityObject;
+import com.rentarosato520.spacefighter.entity.GameObject;
 import com.rentarosato520.spacefighter.entity.ID;
 import com.rentarosato520.spacefighter.entity.ships.Player;
 import com.rentarosato520.spacefighter.listeners.KeyInput;
 import com.rentarosato520.spacefighter.listeners.MouseInput;
+import com.rentarosato520.spacefigther.gameevents.AsteriodBelt;
 
 public class GameSession extends GameScene{
 	private Handler h;
@@ -55,7 +58,14 @@ public class GameSession extends GameScene{
 		
 		a = new Animator();
 		
-		this.h.addEntity(p);
+		while(!isValidSpawn(p)){
+			p.setX(r.nextInt(Window.screensize.width + 1000));
+			p.setY(r.nextInt(Window.screensize.height + 1000));
+		}
+		
+		if(isValidSpawn(p)){
+			this.h.addEntity(p);
+		}
 		
 		r = new Random();
 		s = new Spawner(h, hud, p);
@@ -68,25 +78,27 @@ public class GameSession extends GameScene{
 					l.load("/Sound/TheEndlesSpace.wav");
 				}
 			}).start();
-		}if(rand <= 10){
+		}if(rand <= 10 && rand > 5){
 			new Thread(new Runnable(){
 				public void run(){
 					l.load("/Sound/TheSpaceArmada.wav");
 				}
 			}).start();
-		}if(rand <= 15){
+		}if(rand <= 15 && rand > 10){
 			new Thread(new Runnable(){
 				public void run(){
 					l.load("/Sound/BeautifulTerra.wav");
 				}
 			}).start();
-		}else{
+		}
+		if(rand > 15){
 			new Thread(new Runnable(){
 				public void run(){
 					l.load("/Sound/SpaceSong.wav");
 				}
 			}).start();
 		}
+		System.out.println(rand);
 	}
 	
 	public void render(Graphics g, Graphics2D g2d) {
@@ -100,7 +112,7 @@ public class GameSession extends GameScene{
 			
 			g2d.translate(-c.getX(), -c.getY());
 			
-			hud.render(g);
+			hud.render(g, s);
 			if(isReloading){
 				g.setColor(Color.red);
 				g.drawString("Reloading...", 90, 75);
@@ -144,7 +156,7 @@ public class GameSession extends GameScene{
 		}
 	}
 	
-	public void tick() {
+	public void tick(AsteriodBelt ab) {
 		if(!statChoice || !isShop){
 			r.nextInt(3);
 			
@@ -168,6 +180,10 @@ public class GameSession extends GameScene{
 			s.tick();
 			h.tick();
 			hud.tick();
+			
+			if(ab != null){
+				ab.tick();
+			}
 			
 			/*for(int i = 0; i < h.faction.size(); i++){
 				Faction f = h.faction.get(i);
@@ -203,7 +219,29 @@ public class GameSession extends GameScene{
 		}
 	}
 	
+	
+	public boolean isValidSpawn(EntityObject e){
+		for(EntityObject tempObject : h.entity){
+			for(GameObject o : h.object){
+				if(e.getBounds().intersects(o.getBounds())){
+					return false;
+				}else if(e.getBounds().intersects(tempObject.getBounds())){
+					return false;
+				}else{
+					return true;
+				}
+			}
+		}
+		return true;
+	}
+	
 	public Player getPlayer(){
 		return p;
+	}
+
+	@Override
+	public void tick() {
+		// TODO Auto-generated method stub
+		
 	} 
 }

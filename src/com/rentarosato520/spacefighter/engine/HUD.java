@@ -9,6 +9,7 @@ import com.rentarosato520.spacefighter.entity.EntityObject;
 import com.rentarosato520.spacefighter.entity.ID;
 import com.rentarosato520.spacefighter.entity.ships.Player;
 import com.rentarosato520.spacefighter.factions.Faction;
+import com.rentarosato520.spacefighter.factions.Watchmen;
 import com.rentarosato520.spacefighter.listeners.KeyInput;
 
 public class HUD {
@@ -48,7 +49,7 @@ public class HUD {
 		}
 	}
 	
-	public void render(Graphics g){
+	public void render(Graphics g, Spawner s){
 		g.setColor(Color.darkGray);
 		g.fillRect(2, 2, c+20, 50);
 		g.setColor(new Color(75, c, 0));
@@ -70,6 +71,17 @@ public class HUD {
 		g.drawString("Cash: $"+p.getCurrency(), 15, 325);
 		g.drawString("Ship Parts Collected: "+p.getNumShipParts(), 15, 350);
 		g.drawString("Ammo: "+KeyInput.Ammo, 15, 375);
+		g.drawString("Spawn Attempts: "+Spawner.spawnTimes, 15, 400);
+		g.drawString("Time Until Next Spawn: "+s.getSpawnTick()+" / "+s.getSpawnLim(), 15, 425);
+		g.drawString("Number of Events that Occured: "+GameMain.numEvents, 15, 450);
+		g.drawString("Difficulty: "+Spawner.getDiffculty(), 15, 475);
+	
+		g.drawString("Faction Members: "+p.getMembers(), 15, Window.screensize.height - 75);
+		g.drawString("Faction Members Lost: "+h.getDeaths(), 215, Window.screensize.height - 75);
+		g.drawString("Total Faction Strength: ", 415, Window.screensize.height - 75);
+		g.drawString("Total Commanding Rank: ", 615, Window.screensize.height - 75);
+		g.drawString("Team Kill Total: ", 915, Window.screensize.height - 75);
+		
 		if(KeyInput.Ammo == 0){
 			g.drawString("Reloading...", 95, 375);
 		}
@@ -77,5 +89,7 @@ public class HUD {
 		g.fillRect(Window.screensize.width - 70, 12, 60, 20);
 		g.setColor(Color.BLUE);
 		g.drawString("Menu", Window.screensize.width - 55, 28);
+		g.setColor(Color.RED);
+		//g.drawLine(400, 200,(int) p.getShotVelX(),(int) p.getShotVelY());
 	}
 }

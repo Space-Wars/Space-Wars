@@ -16,7 +16,7 @@ public class SupplyShip extends EntityObject{
 	private int directionSpawn;
 	private int healthBonus, cashBonus, shipBonus;
 	
-	public SupplyShip(int x, int y, int width, int height, ID id, Handler h, int d) {
+	public SupplyShip(float x, float y, int width, int height, ID id, Handler h, int d) {
 		super(x, y, width, height, h);
 		this.x = x;
 		this.y = y;
@@ -60,12 +60,12 @@ public class SupplyShip extends EntityObject{
 
 	
 	public void render(Graphics g) {
-		g.drawImage(Assets.SupplyShip, x, y, null);
+		g.drawImage(Assets.SupplyShip,(int) x,(int) y, null);
 	}
 
 	
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, width, height);
+		return new Rectangle((int)x,(int) y, width, height);
 	}
 
 

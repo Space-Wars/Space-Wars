@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.rentarosato520.spacefighter.Window;
 import com.rentarosato520.spacefighter.asset.animation.Animator;
+import com.rentarosato520.spacefighter.asset.sound.SoundLoader;
 import com.rentarosato520.spacefighter.engine.GameMain;
 import com.rentarosato520.spacefighter.engine.Handler;
 import com.rentarosato520.spacefighter.entity.EntityObject;
@@ -25,9 +26,9 @@ public class StandardShip extends EntityObject{
 	private Animator a;
 	private Faction ef;
 	private EntityObject object;
-	private int desX, desY;
-	private int  lx, ly, targetX, targetY; //target;
-	private boolean animateReady, ObjectX, ObjectY;
+	private int desX, desY, rand;
+	private int  lx, ly; //target;
+	private boolean animateReady, ObjectX, ObjectY, claimKill, isCommandShip;
 	public static int isDead, ran, ra, rn;
 	public static boolean thisDeath;
 	public static boolean choAttack, choDefense, choSpeed, choShealth, choCommanding;
@@ -62,6 +63,7 @@ public class StandardShip extends EntityObject{
 		this.shealthLim = 20;
 		this.commandingLim = 20;
 		this.currency = 0;
+		this.claimKill = false;
 		
 		this.attack = r.nextInt(attackLim);
 		this.defense = r.nextInt(defenseLim) + 1;
@@ -76,6 +78,7 @@ public class StandardShip extends EntityObject{
 		this.desY = r.nextInt(Window.screensize.height + 900);
 		//this.vectW = 5;
 		rn = r.nextInt(5);
+		rand = r.nextInt(3);
 		
 		if(rn == 0){
 			if(attack < 15){
@@ -134,8 +137,9 @@ public class StandardShip extends EntityObject{
 
 	
 	public void tick() {
-		ObjectX = GameMain.objectCollision(0, Window.screensize.width + 1000, x);
-		ObjectY = GameMain.objectCollision(0, Window.screensize.height + 1000, y);
+		System.out.println("Ship: "+commanding+" Faction: "+Faction.getFactionName(f));
+		ObjectX = GameMain.objectCollision(0, Window.screensize.width + 1000,(int) x);
+		ObjectY = GameMain.objectCollision(0, Window.screensize.height + 1000,(int) y);
 		
 		x += velX;
 		y += velY;
@@ -153,6 +157,12 @@ public class StandardShip extends EntityObject{
 					if(object.getY() >= this.y && object.getY() <= this.y + 300){
 						this.setTarget(object);
 					}
+					if(object.getX() <= this.x && object.getX() >= this.x - 300){
+						this.setTarget(object);
+					}
+					if(object.getY() <= this.y && object.getY() >= this.y - 300){
+						this.setTarget(object);
+					}
 				}
 			}
 		}
@@ -163,33 +173,65 @@ public class StandardShip extends EntityObject{
 			targetY = this.target.getY();
 			if(targetX > x && targetX < x + 300){
 				attack(targetX, targetY);
+				if(rand == 0){
+					SoundLoader.loadSoundEffect("/Sound/Laser1.wav");
+				}else if(rand == 1){
+					SoundLoader.loadSoundEffect("/Sound/Laser2.wav");
+				}else{
+					SoundLoader.loadSoundEffect("/Sound/Laser3.wav");
+				}
+				rand = r.nextInt(3);
 			}
 			if(targetX < x  && targetX > x - 300){
 				attack(targetX, targetY);
+				if(rand == 0){
+					SoundLoader.loadSoundEffect("/Sound/Laser1.wav");
+				}else if(rand == 1){
+					SoundLoader.loadSoundEffect("/Sound/Laser2.wav");
+				}else{
+					SoundLoader.loadSoundEffect("/Sound/Laser3.wav");
+				}
+				rand = r.nextInt(3);
 			}
 			if(targetY > y && targetY < y + 300){
 				attack(targetX, targetY);
+				if(rand == 0){
+					SoundLoader.loadSoundEffect("/Sound/Laser1.wav");
+				}else if(rand == 1){
+					SoundLoader.loadSoundEffect("/Sound/Laser2.wav");
+				}else{
+					SoundLoader.loadSoundEffect("/Sound/Laser3.wav");
+				}
+				rand = r.nextInt(3);
 			}
 			if(targetY < y  && targetY > y - 300){
 				attack(targetX, targetY);
+				if(rand == 0){
+					SoundLoader.loadSoundEffect("/Sound/Laser1.wav");
+				}else if(rand == 1){
+					SoundLoader.loadSoundEffect("/Sound/Laser2.wav");
+				}else{
+					SoundLoader.loadSoundEffect("/Sound/Laser3.wav");
+				}
+				rand = r.nextInt(3);
 			}else{
 				target = null;
 				velX = 1;
 				velY = 1;
 			}
-			coolDown = 500;
+			coolDown = 200;
 		}
 		if(this.target == null){
 			wander();
 		}
-		/*rand = r.nextInt(100);
+		/*rand = r.nextInt(100);*/
 		if(kills == killLim){
 			level++;
 			levelUp();
 			kills = 0;
 			killLim += killLim/2;
 		}
-		
+		/*
 		x += velX;
 		y += velY;
 		
@@ -294,7 +336,7 @@ public class StandardShip extends EntityObject{
 						}
 						if(m.isDoesDamage() && m.isExplodes() || m.isDoesDamage() && m.isOnFire()){
 							if(m.isExplodes()){
-								a.AnimateExplosion(g, tempObject.getX(), tempObject.getY(), 32, 32);
+								a.AnimateExplosion(g,(int) tempObject.getX(),(int) tempObject.getY(), 32, 32);
 								this.health -= m.getDamage();
 								if(a.isFin[0]){
 									h.removeObject(tempObject);
@@ -344,23 +386,35 @@ public class StandardShip extends EntityObject{
 				}
 			}*/
 		}
+		Commanding();
 	}
 
-	public void attack(int targetX, int targetY){
-		h.addObject(new NpcLaser(x + 60, y + 60, 5, 9, h, f, targetX, targetY, this.attack));
+	public void attack(float targetX, float targetY){
+		h.addObject(new NpcLaser(x + 60,y + 60, 5, 9, h, f, targetX, targetY, this.attack, this));
 	}
 	
 	public void render(Graphics g) {
 		Collision(g);
-		a.AnimateEnemy(g, this.x, this.y, this.width, this.height, f);
+		a.AnimateEnemy(g,(int) this.x,(int) this.y, this.width, this.height, f);
 		if(animateReady){
 			a.AnimateMini(g, lx, ly, ran, ran);
 		}
 		if(health <= 0){
 			setDeath(true);
+			if(!claimKill && this.attacker != null){
+				if(this.attacker instanceof Player){
+					for(EntityObject p : h.entity){
+						p.setKills(1);
+						this.attacker = null;
+						claimKill = true;
+					}
+				}else{
+					attacker.setKills(1);
+					claimKill = true;
+				}
+			}
 			StandardShip.thisDeath = true;
-			a.AnimateExplosion(g, x, y, width, height);
-			
+			a.AnimateExplosion(g,(int) x,(int) y, width, height);
 			if(Animator.isFin[0]){
 				ra = r.nextInt(10);
 				
@@ -372,6 +426,9 @@ public class StandardShip extends EntityObject{
 					for(int i = 0; i < numShipParts; i++){
 						h.addObject(new ShipPart(x, y, 32, 32, ID.ShipPart, h));
 					}
+					if(numShipParts == 0){
+						h.addObject(new ShipPart(x, y, 32, 32, ID.ShipPart, h));
+					}
 				}
 				h.removeEntity(this);
 				Animator.isFin[0] = false;
@@ -381,6 +438,13 @@ public class StandardShip extends EntityObject{
 	}
 	
 	public Rectangle getBounds() {
-		return new Rectangle(x + 40, y + 37, 50, 50);
+		return new Rectangle((int)x + 40,(int) y + 37, 50, 50);
+	}
+	
+	public void Commanding(){
+		if(this.setCommander){
+			h.removeEntity(this);
+			h.addEntity(new CommandShip(x, y, width, height, h, 0));
+		}
 	}
 }

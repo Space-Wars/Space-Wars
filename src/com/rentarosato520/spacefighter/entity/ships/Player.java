@@ -13,6 +13,7 @@ import com.rentarosato520.spacefighter.asset.animation.Assets;
 import com.rentarosato520.spacefighter.engine.GameMain;
 import com.rentarosato520.spacefighter.engine.HUD;
 import com.rentarosato520.spacefighter.engine.Handler;
+import com.rentarosato520.spacefighter.engine.Spawner;
 import com.rentarosato520.spacefighter.entity.EntityObject;
 import com.rentarosato520.spacefighter.entity.GameObject;
 import com.rentarosato520.spacefighter.entity.ID;
@@ -21,9 +22,6 @@ import com.rentarosato520.spacefighter.entity.misc.Money;
 import com.rentarosato520.spacefighter.entity.misc.ShipPart;
 import com.rentarosato520.spacefighter.factions.AssignFaction;
 import com.rentarosato520.spacefighter.factions.Faction;
-import com.rentarosato520.spacefighter.factions.Mercenary;
-import com.rentarosato520.spacefighter.factions.SpaceMarauder;
-import com.rentarosato520.spacefighter.factions.Watchmen;
 import com.rentarosato520.spacefighter.listeners.KeyInput;
 
 public class Player extends EntityObject{
@@ -33,22 +31,31 @@ public class Player extends EntityObject{
 	private Animator a;
 	private Camera c;
 	private Random r;
-	private int healthMax;
+	private int healthMax, rotateShot, rotate, aimVel, rotateTim;
+	private double shotVelY, shotVelX;
+	private boolean isDecay;
 	public static boolean[] animate;
-	public static boolean choAttack, choDefense, choSpeed, choShealth, choCommanding;
+	public static boolean choAttack, choDefense, choSpeed, choShealth, choCommanding, isCommandShip;
 	public static int Ammo, rand;
-	public static int pAttack;
+	public static int pAttack, defaultVel;
 	
 	public Player(int x, int y, int width, int height, ID id, Handler h, Camera c){
 		super(x, y, width, height, h);
 		
-		this.x = x;
-		this.y = y;
+		this.x = x - 15;
+		this.y = y - 20;
 		this.height = height;
 		this.width = width;
 		this.h = h;
 		this.id = id;
 		this.c = c;
+		this.rotate = 0;
+		this.rotateShot = 0;
+		this.aimVel = 0;
+		this.rotateTim = 0;
+		this.isDecay = false;
+		
+		Player.defaultVel =  1;
 		Player.Ammo = KeyInput.Ammo;
 		
 		r = new Random();		
@@ -81,38 +88,86 @@ public class Player extends EntityObject{
 		this.isFacing = 0;
 		this.healthMax = 1000;
 		this.health = r.nextInt(500) + 300;
-		
+			
 		for(int i = 0; i < animate.length; i++){
 			animate[i] = false;
 		}
 	}
+	
+	public void decay(){
+		if(isDecay){
+			//System.out.println(velX+" past "+velY);
+			if(velX < 0){velX += 1;}
+			if(velY < 0){velY += 1;}
+			if(velX > 0){velX -= 1;}
+			if(velY > 0){velY -= 1;}
+			//System.out.println(velX+" now "+velY);
+		}
+		if(isDecay && velX == 0 && velY == 0){
+			
+		}
+	}
+	
+	public void turretAim(){
+		if(rotateShot == 1){
+			rotateTim++;
+			if(rotateTim > 100){
+				rotate += 1;
+				rotateTim = 0;
+			}
+		}
+		if(rotateShot == -1){
+			rotateTim++;
+			if(rotateTim > 100){
+				rotate -= 1;
+				rotateTim = 0;
+			}
+		}
+		shotVelX = Math.cos(rotate) * 10;
+		shotVelY = Math.sin(rotate) * 10;
+		//System.out.println("VelX: "+shotVelX+" VelY: "+shotVelY+" rotate: "+rotate);
+	}
 
 	public void tick() {
+		System.out.println("Player: "+commanding+" HasSpawned: "+Spawner.hasSpawned);
 		x += velX;
 		y += velY;
 		
 		if(rand == 0){
 			this.f = AssignFaction.m;
+			rand = 4;
 		}
 		if(rand == 2){
 			this.f = AssignFaction.w;
+			rand = 4;
 		}
 		if(rand == 1){
 			this.f = AssignFaction.s;
+			rand = 4;
 		}
 		
-		this.f.addMember(this);
+		//System.out.println("velX: "+shotVelX+" velY: "+shotVelY+" aimVel: "+aimVel);
+		
+		if(f != null){
+			this.f.addMember(this);
+		}
+			
 		if(kills == killLim){
 			level++;
 			levelUp();
 			kills = 0;
 			killLim += killLim/2;
 		}
-		
-		x = GameMain.clamp(0 - 1000, Window.screensize.width + 1000, x);
-		y = GameMain.clamp(0 - 1000, Window.screensize.height + 1000, y);
-		velX = GameMain.clamp(-50, 50, velX);
-		velY = GameMain.clamp(-50, 50, velY);
+		if(rotate == 360){
+			rotate = 0;
+		}
+		if(rotate == 0){
+			rotate = 360;
+		}
+		x = GameMain.clampF(0 - 1000, Window.screensize.width + 1000, x);
+		y = GameMain.clampF(0 - 1000, Window.screensize.height + 1000, y);
+		velX = GameMain.clampF(-50, 50, velX);
+		velY = GameMain.clampF(-50, 50, velY);
 		
 		if(velX >= 1 && velY >= 1){isFacing = 6;} 
 		if(velX >= -100 && velX < 0 && velY >= -100 && velY < 0){isFacing = 5;}
@@ -122,7 +177,7 @@ public class Player extends EntityObject{
 		if(velX >= 1 && velY == 0){isFacing = 2;}
 		if(velX == 0 && velY >= -100 && velY < 0){isFacing = 0;}
 		if(velX == 0 && velY >= 1){isFacing = 1;}
-		
+
 		
 		if(this.isFiring){
 			tim++;
@@ -135,8 +190,11 @@ public class Player extends EntityObject{
 			health -= isDamage - (defense/2);
 			removeShot = true;
 			isDamage = 0;
+		}else if(this.isDamage > 0){
+			health -= 1;
+			isDamage = 0;
 		}
-		
+		//Deal with player kills
 		if(choAttack){
 			if(attack < 15){
 				attack = r.nextInt(attackLim) + 15;
@@ -166,6 +224,8 @@ public class Player extends EntityObject{
 		}
 		
 		health = GameMain.clamp(0, healthMax, health);
+		turretAim();
+		decay();
 	}
 	
 	public void Collision(Graphics g){
@@ -196,11 +256,11 @@ public class Player extends EntityObject{
 						}
 						if(m.isDoesDamage() && m.isExplodes() || m.isDoesDamage() && m.isOnFire()){
 							if(m.isExplodes()){
-								a.AnimateExplosion(g, tempObject.getX(), tempObject.getY(), 32, 32);
+								a.AnimateExplosion(g,(int) tempObject.getX(), (int) tempObject.getY(), 32, 32);
 								this.health -= m.getDamage();
-								if(a.isFin[0]){
+								if(Animator.isFin[0]){
 									h.removeObject(tempObject);
-									a.isFin[0] = false;
+									Animator.isFin[0] = false;
 								}
 							}
 							if(m.isOnFire()){
@@ -245,44 +305,45 @@ public class Player extends EntityObject{
 				}
 			}
 		}
+		Commanding();
 	}
 
 	public void render(Graphics g) {
 		Collision(g);
 		if(isFacing == 7){
-			g.drawImage(Assets.playerR4, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerR4, (int)x + 10, (int)y, width, height, null);
 		}
 		if(isFacing == 6){
-			g.drawImage(Assets.playerR3, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerR3,(int) x + 10, (int)y, width, height, null);
 		}
 		if(isFacing == 5){
-			g.drawImage(Assets.playerR2, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerR2, (int)x + 10, (int)y, width, height, null);
 		}
 		if(isFacing == 4){
-			g.drawImage(Assets.playerR1,  x + 10, y, width, height, null);
+			g.drawImage(Assets.playerR1, (int) x + 10,(int) y, width, height, null);
 		}
 		if(isFacing == 3){
-			g.drawImage(Assets.playerLeft, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerLeft,(int) x + 10,(int) y, width, height, null);
 			if(animate[3]){
-				a.AnimateRocketLeft(g, x + 90, y + 33, 32, 32);
+				a.AnimateRocketLeft(g,(int) x + 90,(int) y + 33, 32, 32);
 			}
 		}
 		if(isFacing == 2){
-			g.drawImage(Assets.playerRight, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerRight,(int) x + 10,(int) y, width, height, null);
 			if(animate[2]){
-				a.AnimateRocketRight(g, x + 30, y + 33, 32, 32);
+				a.AnimateRocketRight(g,(int) x + 30,(int) y + 33, 32, 32);
 			}
 		}
 		if(isFacing == 1){
-			g.drawImage(Assets.playerBack, x + 10, y, width, height, null);
+			g.drawImage(Assets.playerBack,(int) x + 10,(int) y, width, height, null);
 			if(animate[1]){
-				a.AnimateRocketDown(g, x + 42, y + 20, 32, 32);
+				a.AnimateRocketDown(g,(int) x + 42,(int) y + 20, 32, 32);
 			}
 		}
 		if(isFacing == 0){
-			g.drawImage(Assets.player,  x + 10, y, width, height, null);
+			g.drawImage(Assets.player, (int) x + 10,(int) y, width, height, null);
 			if(animate[0]){
-				a.AnimateRocket(g, x + 45, y + 80, 32, 32);
+				a.AnimateRocket(g,(int) x + 45,(int) y + 80, 32, 32);
 			}
 		}
 		
@@ -308,9 +369,9 @@ public class Player extends EntityObject{
 			velY = 0;
 			g.setColor(Color.white);
 			g.setFont(new Font(null, Font.PLAIN, 40));
-			g.drawString("Press 'r' to Respawn!", c.getX() + 500, c.getY() + 500);
+			g.drawString("Press 'r' to Respawn!",(int) c.getX() + 500,(int) c.getY() + 500);
 			this.setDeath(true);
-			a.AnimateExplosion(g, x, y, width, height);
+			a.AnimateExplosion(g,(int) x,(int) y, width, height);
 			if(Animator.isFin[0]){
 				h.removeEntity(this);
 				Animator.isFin[0] = false;
@@ -319,7 +380,7 @@ public class Player extends EntityObject{
 		
 		if(isLevelUp){
 			g.setColor(Color.WHITE);
-			g.drawString("LEVEL UP!!!!!", x, y);
+			g.drawString("LEVEL UP!!!!!",(int) x,(int) y);
 		}
 	}
 	
@@ -350,6 +411,65 @@ public class Player extends EntityObject{
 			commanding += (r.nextInt(commandingLim) + 15)/2;	
 		}
 	}
+	
+	public void Commanding(){
+		//if(this.setCommander){
+		//	h.removeEntity(this);
+		//	h.addEntity(new CommandShip(x, y, width, height, h, 1));
+		//}
+	}
+	
+	public String getMembers(){
+		if(f != null){
+			return ""+f.members.size();
+		}else{
+			return null;
+		}
+	}
+	
+	public void spendCurrency(int Amount){
+		this.currency -= Amount;
+	}
+	
+	public boolean isDecay() {
+		return isDecay;
+	}
+
+	public void setDecay(boolean isDecay) {
+		this.isDecay = isDecay;
+	}
+
+	public double getShotVelX() {
+		return shotVelX;
+	}
+
+	public void setShotVelX(int shotVelX) {
+		this.shotVelX = shotVelX;
+	}
+
+	public double getShotVelY() {
+		return shotVelY;
+	}
+
+	public void setShotVelY(int shotVelY) {
+		this.shotVelY = shotVelY;
+	}
+
+	public int getRotate() {
+		return rotate;
+	}
+
+	public void setRotate(int rotate) {
+		this.rotate = rotate;
+	}
+
+	public int getRotateShot() {
+		return rotateShot;
+	}
+
+	public void setRotateShot(int rotateShot) {
+		this.rotateShot = rotateShot;
+	}
 
 	public Faction getPlayerFaction(){
 		return this.f;
@@ -372,22 +492,22 @@ public class Player extends EntityObject{
 	}
 
 	public Rectangle getBoundsRightWing() {
-		return new Rectangle(x + 87, y + 85, 30, 30);
+		return new Rectangle((int)x + 87,(int)y + 85, 30, 30);
 	}
 	
 	public Rectangle getBoundsLeftWing(){
-		return new Rectangle(x + 37, y + 85, 30, 30);
+		return new Rectangle((int) x + 37,(int) y + 85, 30, 30);
 	}
 	
 	public Rectangle getBoundsBottomLeftWing() {
-		return new Rectangle(x + 34, y + 115, 37, 10);
+		return new Rectangle((int) x + 34,(int) y + 115, 37, 10);
 	}
 	
 	public Rectangle getBoundsBottomRightWing(){
-		return new Rectangle(x + 84, y + 115, 37, 10);
+		return new Rectangle((int) x + 84,(int) y + 115, 37, 10);
 	}
 
 	public Rectangle getBounds() {
-		return new Rectangle(x + 67, y + 35, 20, 90);
+		return new Rectangle((int) x + 67, (int)y + 35, 20, 90);
 	}
 }

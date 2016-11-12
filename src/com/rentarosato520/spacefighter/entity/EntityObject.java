@@ -11,7 +11,7 @@ public abstract class EntityObject extends GameObject{
 	protected boolean isFiring;
 	protected boolean isMoving;
 	protected boolean isBacking;
-	protected int targetX, targetY;
+	protected float targetX, targetY;
 	protected boolean isDeath;
 	protected int isFacing;
 	protected int isDamage;
@@ -21,22 +21,36 @@ public abstract class EntityObject extends GameObject{
 	protected int EnemySize;
 	protected int SearchTime;
 	protected int memberSize;
-	protected boolean wasPlayer, wasEnemy, wasNeutral, wasFriendly;
+	protected boolean wasPlayer, wasEnemy, wasNeutral, wasFriendly, setCommander;
 	protected Faction f;
 	protected Faction ef;
-	protected EntityObject target;
+	protected EntityObject target, attacker;
 	protected ArrayList<EntityObject> currentTargets = new ArrayList<EntityObject>();
 	
 	protected int attack, defense, speed, shealth, commanding, coolDown;
 	protected int attackLim, defenseLim, speedLim, shealthLim, commandingLim;
 	protected int currency, numShipParts;
 	
-	public EntityObject(int x, int y, int width, int height, Handler h) {
+	public EntityObject(float x, float y, int width, int height, Handler h) {
 		super(x, y, width, height, h);
 	}
 	
+	public void followCommander(){
+		
+	}
 	
-	
+	public boolean isSetCommander() {
+		return setCommander;
+	}
+
+
+
+	public void setSetCommander(boolean setCommander) {
+		this.setCommander = setCommander;
+	}
+
+
+
 	public int getSearchTime() {
 		return SearchTime;
 	}
@@ -49,7 +63,7 @@ public abstract class EntityObject extends GameObject{
 
 
 
-	public int getTargetX() {
+	public float getTargetX() {
 		return targetX;
 	}
 
@@ -61,7 +75,7 @@ public abstract class EntityObject extends GameObject{
 
 
 
-	public int getTargetY() {
+	public float getTargetY() {
 		return targetY;
 	}
 
@@ -171,7 +185,8 @@ public abstract class EntityObject extends GameObject{
 		return isDamage;
 	}
 
-	public void setDamage(int isDamaged) {
+	public void setDamage(int isDamaged, EntityObject attacker) {
+		this.attacker = attacker;
 		this.isDamage = isDamaged;
 	}
 
@@ -413,7 +428,13 @@ public abstract class EntityObject extends GameObject{
 		this.wasFriendly = wasFriendly;
 	}
 	
-	
+	public boolean hasFaction(){
+		if(this.f != null){
+			return true;
+		}else{
+			return false;
+		}
+	}
 
 
 }

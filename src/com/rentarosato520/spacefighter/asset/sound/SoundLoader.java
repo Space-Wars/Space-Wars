@@ -72,43 +72,26 @@ public class SoundLoader implements LineListener{
 		audioClip.close();
 	}
 	
-	public void loadSoundEffect(String path){
-		try {
-			aud = AudioSystem.getAudioInputStream(getClass().getResource(path));
-		} catch (UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		form = aud.getFormat();
-		this.i = new DataLine.Info(Clip.class, form);
-		
-		try {
-			audioC = (Clip) AudioSystem.getLine(i);
-		} catch (LineUnavailableException e1) {
-			e1.printStackTrace();
-		}
-		
-		audioC.addLineListener(this);
-		
-		try {
-			try {
-				audioC.open(aud);
-			} catch (LineUnavailableException e) {
-				e.printStackTrace();
-			}
-		} catch (IOException e) {
+	public static void loadSoundEffect(final String path){
+		try{
+			new Thread(new Runnable() {
+			  // The wrapper thread is unnecessary, unless it blocks on the
+			  // Clip finishing; see comments.
+			    public void run() {
+			      try {
+			        Clip clip = AudioSystem.getClip();
+                     AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResource(path));
+			        clip.open(inputStream);
+			        clip.start(); 
+			        
+			      } catch (Exception e) {
+			        System.err.println(e.getMessage());
+			      }
+			    }
+			  }).start();
+		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
-		audioC.start();
-		
-		while(!isDone){
-			
-		}
-		
-		audioC.close();
 	}
 
 	@Override

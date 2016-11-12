@@ -3,14 +3,14 @@ package com.rentarosato520.spacefighter;
 import com.rentarosato520.spacefighter.entity.EntityObject;
 
 public class Camera {
-	private int x, y;
+	private float x, y;
 	
 	public Camera(int x, int y){
 		this.x = x;
 		this.y = y;
 	}
 	
-	public int getX() {
+	public float getX() {
 		return x;
 	}
 
@@ -22,7 +22,7 @@ public class Camera {
 
 
 
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 

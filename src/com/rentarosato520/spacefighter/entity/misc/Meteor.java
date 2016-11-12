@@ -17,9 +17,9 @@ public class Meteor extends GameObject{
 	private Animator a;
 	private boolean doesDamage, explodes, onFire, explodeNow;
 	private int ra, rd, rn;
-	private int directionSpawn, damage;
+	private int directionSpawn, damage, health, meteorSpeed;
 
-	public Meteor(int x, int y, int width, int height, ID id, Handler h, int s) {
+	public Meteor(float x, float y, int width, int height, ID id, Handler h, int s) {
 		super(x, y, width, height,  h);
 		this.x = x;
 		this.y = y;
@@ -28,7 +28,9 @@ public class Meteor extends GameObject{
 		this.h = h;
 		this.id = id;
 		this.r = new Random();
+		this.health = r.nextInt(500) + 500;
 		this.directionSpawn = s;
+		this.meteorSpeed = r.nextInt(7)+3;
 		this.a = new Animator();
 
 		ra = r.nextInt(2);
@@ -63,17 +65,18 @@ public class Meteor extends GameObject{
 		y += velY;
 		
 		if(directionSpawn == 0){
-			velX = 3;
+			velX = meteorSpeed;
 		}
 		if(directionSpawn == 1){
-			velX = -3;
+			velX = -meteorSpeed;
 		}
 		if(directionSpawn == 2){
-			velY = 3;
+			velY = meteorSpeed;
 		}
 		if(directionSpawn == 3){
-			velY = -3;
-		}else{
+			velY = -meteorSpeed;
+		}
+		if(directionSpawn == 7){
 			velX = 0;
 			velY = 0;
 		}
@@ -84,21 +87,26 @@ public class Meteor extends GameObject{
 		if(y > Window.screensize.getHeight() + 1200 || y < 0 - 1200){
 			h.removeObject(this);
 		}
+		
+		if(health <= 0){
+			explodeNow = true;
+		}
 	}
-
+	
 	public void render(Graphics g) {
-		g.drawImage(Assets.meteor, x, y, width, height, null);
+		g.drawImage(Assets.meteor,(int) x,(int) y, width, height, null);
 		if(explodeNow){
-			a.AnimateExplosion(g, x, y, width, height);
+			a.AnimateExplosion(g,(int) x,(int) y, width, height);
 			if(Animator.isFin[0]){
 				h.object.remove(this);
 				Animator.isFin[0] = false;
 			}
 		}
+		//g.drawRect((int) (x - x*0.75), (int) (y - y * 0.75), (int) (width), (int) (height - y*0.75));
 	}
-
+	
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, width, height);
+		return new Rectangle((int) (x), (int) (y), (int) (width), (int) (height));
 	}
 
 	public boolean isDoesDamage() {
@@ -140,7 +148,12 @@ public class Meteor extends GameObject{
 	public void setExplodeNow(boolean explodeNow) {
 		this.explodeNow = explodeNow;
 	}
-	
-	
 
+	public int getHealth() {
+		return health;
+	}
+
+	public void setHealth(int health) {
+		this.health -= health;
+	}
 }

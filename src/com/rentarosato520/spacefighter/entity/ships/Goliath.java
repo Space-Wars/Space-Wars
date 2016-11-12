@@ -9,6 +9,7 @@ import java.util.Random;
 import com.rentarosato520.spacefighter.Window;
 import com.rentarosato520.spacefighter.asset.animation.Animator;
 import com.rentarosato520.spacefighter.asset.animation.Assets;
+import com.rentarosato520.spacefighter.asset.sound.SoundLoader;
 import com.rentarosato520.spacefighter.engine.GameMain;
 import com.rentarosato520.spacefighter.engine.Handler;
 import com.rentarosato520.spacefighter.entity.EntityObject;
@@ -29,16 +30,16 @@ public class Goliath extends EntityObject{
 	private Animator a;
 	private EntityObject object;
 	private int desX, desY;
-	private int lx, ly;
+	private int lx, ly, rand;
 	private int health;
-	private boolean animateReady, ObjectX, ObjectY;
-	private int healthDis;
+	private boolean animateReady, ObjectX, ObjectY, claimKill;
+	private int healthDis, amount;
 	public static int isDead, ran, ra, rn;
 	public static boolean thisDeath;
 	public static boolean choAttack, choDefense, choSpeed, choShealth, choCommanding;
 	
 	
-	public Goliath(int x, int y, int width, int height, Handler h, Faction f) {
+	public Goliath(float x, float y, int width, int height, Handler h, Faction f) {
 		super(x, y, width, height, h);
 		
 		r = new Random();
@@ -55,6 +56,7 @@ public class Goliath extends EntityObject{
 		this.animateReady = false;
 		this.killLim = r.nextInt(4) + 1;
 		this.f = f;
+		this.claimKill = false;
 		this.f.addMember(this);
 		
 		this.attackLim = 70;
@@ -71,9 +73,11 @@ public class Goliath extends EntityObject{
 		
 		this.velX = speed;
 		this.velY = speed;
+		this.amount = r.nextInt(4)+4;
 		desX = r.nextInt((int) Window.screensize.width + 900);
 		desY = r.nextInt((int)Window.screensize.height + 900);
 		rn = r.nextInt(5);
+		rand = r.nextInt(3);
 		
 		if(rn == 0){
 			if(attack < 15){
@@ -133,8 +137,21 @@ public class Goliath extends EntityObject{
 
 	
 	public void tick() {
-		ObjectX = GameMain.objectCollision(0, Window.screensize.width + 1000, x);
-		ObjectY = GameMain.objectCollision(0, Window.screensize.height + 1000, y);
+		if(this.x > 2500){
+			h.removeEntity(this);
+		}
+		if(this.y > 2500){
+			h.removeEntity(this);
+		}
+		if(this.x < -2500){
+			h.removeEntity(this);
+		}
+		if(this.y < -2500){
+			h.removeEntity(this);
+		}
+		
+		ObjectX = GameMain.objectCollision(0, Window.screensize.width + 1000,(int) x);
+		ObjectY = GameMain.objectCollision(0, Window.screensize.height + 1000,(int) y);
 		
 		if(ObjectX){
 			velX *= -1;
@@ -149,98 +166,98 @@ public class Goliath extends EntityObject{
 		EnemySize = f.isEnemy.size();
 		if(coolDown > 0){
 			coolDown--;
-			coolDown = GameMain.clamp(0, 1000, coolDown);
+			coolDown = (int) GameMain.clamp(0, 1000, coolDown);
 		}
 		if(this.target == null){
 			for(Faction ef : f.isEnemy){
 				for(EntityObject object : ef.members){
 					if(object.getX() >= this.x && object.getX() <= this.x + 300){
+						targetX = object.getX();
+						targetY = object.getY();
 						this.setTarget(object);
 					}
 					if(object.getY() >= this.y && object.getY() <= this.y + 300){
+						targetX = object.getX();
+						targetY = object.getY();
 						this.setTarget(object);
 					}
+					if(object.getX() <= this.x && object.getX() >= this.x - 300){
+						targetX = object.getX();
+						targetY = object.getY();
+						this.setTarget(object);
+					}
+					if(object.getY() <= this.y && object.getY() >= this.y - 300){
+						targetX = object.getX();
+						targetY = object.getY();
+						this.setTarget(object);
+					}
+					
+					//if(object instanceof Player){
+						//System.out.println("PLAYER ");
+					//}
 				}
 			}
 		}
 		
 		if(this.target != null && coolDown <= 0){
-			velX = 0;
-			velY = 0;
-			targetX = this.target.getX();
-			targetY = this.target.getY();
-			if(targetX > x && targetX < x + 300){
-				broadsideRight();
-			}
-			if(targetX < x  && targetX > x - 300){
-				broadsideLeft();
-			}
-			if(targetY > y && targetY < y + 300){
-				frontCannons();
-			}
-			if(targetY < y  && targetY > y - 300){
-				backCannons();
-			}else{
-				if(y < targetY && velY <= -speed){velY *= -1;}
-				if(y > targetY && velY >= speed){velY *= -1;}
-				if(x < targetX && velX <= -speed){velX *= -1;}
-				if(x > targetX && velX >= speed){velX *= -1;}
-				target = null;
-				velX = 1;
-				velY = 1;
-			}
+			System.out.println("target");
+				velX = 0;
+				velY = 0;
+				//System.out.println(targetX+" "+x+" "+targetY+" "+y+" "+this.f);
+				if(targetX > x /*&& targetX < x + 300*/){
+					//System.out.println("targetr");
+					broadsideRight();
+				}
+				if(targetX < x /* && targetX > x - 300*/){
+					//System.out.println("targetl");
+					broadsideLeft();
+				}
+				if(targetY > y /*&& targetY < y + 300*/){
+					//System.out.println("targetf");
+					frontCannons();
+				}
+				if(targetY < y  /*&& targetY > y - 300*/){
+					//System.out.println("targetb");
+					backCannons();
+				}else{
+					velX = 1;
+					velY = 1;
+					if(y < targetY && velY < -speed){velY *= -1;}
+					if(y > targetY && velY > speed){velY *= -1;}
+					if(x < targetX && velX < -speed){velX *= -1;}
+					if(x > targetX && velX > speed){velX *= -1;}
+					target = null;
+				}
+				
 				coolDown = 500;
+				
 		}
 		if(this.target == null){
 			wander();
 		}
-		System.out.println("velX: "+velX+" velY: "+velY);
-		/*rand = r.nextInt(100);
-		if(kills == killLim){
-			level++;
-			levelUp();
-			kills = 0;
-			killLim += killLim/2;
-		}
-		
-		x += velX;
-		y += velY;
-		
-		if(y < vectY && velY == -speed){velY *= -1;}
-		if(y > vectY && velY == speed){velY *= -1;}
-		if(x < vectX && velX == -speed){velX *= -1;}
-		if(x > vectX && velX == speed){velX *= -1;}
-		if(x == vectX){
-			if(r.nextInt(2) == 0){
-				vectX = r.nextInt(Window.screensize.width);
-			}
-		}
-		if(y == vectY){
-			if(r.nextInt(2) == 0){
-				vectY = r.nextInt(Window.screensize.height);
-			}
-		}
-		
-		if(!wasFire){
-			for(int i = 0; i < h.entity.size(); i++){
-				EntityObject tempObject = h.entity.get(i);
-			}
-		}
-		if(wasFire){
-			reload++;
-			if(reload == 1000){
-				wasFire = false;
-			}
-		}*/
+
+		//System.out.println(x+" "+y+" "+f);
 		
 		if(velX >= -100 && velX < 0 && velY == 0){isFacing = 3;}
 		if(velX >= 1 && velY == 0){isFacing = 2;}
 		if(velX == 0 && velY >= -100 && velY < 0){isFacing = 0;}
 		if(velX == 0 && velY >= 1){isFacing = 1;}
 		
+		//System.out.println(isFacing);
+		
 		if(this.isDamage > 0 && this.isDamage > defense){
 			health -= isDamage - (defense / 2);
 			isDamage = 0;
+		}else if(this.isDamage > 0){
+			health -= 1;
+			isDamage = 0;
+		}
+		
+		if(kills == killLim){
+			level++;
+			levelUp();
+			kills = 0;
+			killLim += killLim/2;
 		}
 	}
 	
@@ -248,7 +265,7 @@ public class Goliath extends EntityObject{
 		this.health +=  r.nextInt(300) + 100;
 		this.attack += r.nextInt(attackLim);
 		this.defense += r.nextInt(defenseLim) + 1;
-		this.speed += r.nextInt(speedLim) + 2;
+		this.speed += r.nextInt(speedLim + 1) + 2;
 		this.shealth += r.nextInt(shealthLim);
 		this.commanding += r.nextInt(commandingLim);
 		
@@ -284,6 +301,7 @@ public class Goliath extends EntityObject{
 		if(y >= desY && y <= desY + 10){
 			desY = r.nextInt(Window.screensize.height + 900);
 		}
+		System.out.println(desX+" "+desY);
 	}
 	
 	public void Collision(Graphics g){
@@ -315,7 +333,7 @@ public class Goliath extends EntityObject{
 							}
 							if(m.isDoesDamage() && m.isExplodes() || m.isDoesDamage() && m.isOnFire()){
 								if(m.isExplodes()){
-									a.AnimateExplosion(g, tempObject.getX(), tempObject.getY(), 32, 32);
+									a.AnimateExplosion(g,(int) tempObject.getX(),(int) tempObject.getY(), 32, 32);
 									this.health -= m.getDamage();
 									if(a.isFin[0]){
 										h.removeObject(tempObject);
@@ -354,35 +372,27 @@ public class Goliath extends EntityObject{
 	}
 	
 	public void broadsideRight(){
-		//for(int i = 0; i < amount; i++){
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
-		//}
+		for(int i = 0; i < amount; i++){
+			h.addObject(new Broadside(x + 80,r.nextInt(height/2)+y - 30, 5, 9, h, this, 0, this.f));
+		}
 	}
 	
 	public void broadsideLeft(){
-		//or(int i = 0; i < amount; i++){
+		for(int i = 0; i < amount; i++){
 			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 1, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 1, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 1, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 1, this.f));
-			h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 1, this.f));
-		//}
+		}
 	}																																																																																															
 	
 	public void frontCannons(){
 
 		h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 2, this.f));
-		h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 2, this.f));
+		h.addObject(new Broadside(x + 40, r.nextInt(height/2)+y - 30, 5, 9, h, this, 2, this.f));
 	}
 	
 	public void backCannons(){
 
 		h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 3, this.f));
-		h.addObject(new Broadside(x + 80, r.nextInt(height/2)+y - 30, 5, 9, h, this, 3, this.f));
+		h.addObject(new Broadside(x + 40, r.nextInt(height/2)+y - 30, 5, 9, h, this, 3, this.f));
 	}
 	
 	public void render(Graphics g) {	
@@ -398,61 +408,61 @@ public class Goliath extends EntityObject{
 		Collision(g);
 		g.setColor(Color.white);
 		g.setFont(new Font(null, Font.PLAIN, 30));
-		g.drawString("Faction: "+Faction.getFactionName(f), x + 45, y - 30);
-		g.drawString("The Goliath", x + 60, y);
-		g.drawString("Lvl: "+level, x + 250, y);
+		g.drawString("Faction: "+Faction.getFactionName(f),(int) x + 45,(int) y - 30);
+		g.drawString("The Goliath",(int) x + 60,(int) y);
+		g.drawString("Lvl: "+level,(int) x + 250,(int) y);
 		g.setColor(Color.red);
-		g.fillRect(x + 40, y + 20 , healthDis/4, 10);
+		g.fillRect((int)x + 40,(int) y + 20 , healthDis/4, 10);
 		g.setColor(Color.green);
-		g.fillRect(x + 40, y + 20 , health/4, 10);
+		g.fillRect((int)x + 40,(int) y + 20 , health/4, 10);
 		if(isFacing == 3 && this.f instanceof Watchmen){
-			g.drawImage(Assets.Goliath, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketLeft(g, x + 90, y + 33, 32, 32);
 		}
 		if(isFacing == 2 && this.f instanceof Watchmen){
-			g.drawImage(Assets.Goliath3, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath1,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketRight(g, x + 30, y + 33, 32, 32);
 		}
 		if(isFacing == 1 && this.f instanceof Watchmen){
-			g.drawImage(Assets.Goliath1, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath3,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketDown(g, x + 42, y + 20, 32, 32);
 		}
 		if(isFacing == 0 && this.f instanceof Watchmen){
-			g.drawImage(Assets.Goliath2,  x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath2,(int)  x + 10,(int) y, width, height, null);
 			//a.AnimateRocket(g, x + 45, y + 80, 32, 32);
 		}
 		
 		if(isFacing == 3 && this.f instanceof Mercenary){
-			g.drawImage(Assets.Goliath4, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath4,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketLeft(g, x + 90, y + 33, 32, 32);
 		}
 		if(isFacing == 2 && this.f instanceof Mercenary){
-			g.drawImage(Assets.Goliath7, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath5,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketRight(g, x + 30, y + 33, 32, 32);
 		}
 		if(isFacing == 1 && this.f instanceof Mercenary){
-			g.drawImage(Assets.Goliath5, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath7,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketDown(g, x + 42, y + 20, 32, 32);
 		}
 		if(isFacing == 0 && this.f instanceof Mercenary){
-			g.drawImage(Assets.Goliath6,  x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath6,(int)  x + 10,(int) y, width, height, null);
 			//a.AnimateRocket(g, x + 45, y + 80, 32, 32);
 		}
 		
 		if(isFacing == 3 && this.f instanceof SpaceMarauder){
-			g.drawImage(Assets.Goliath8, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath8,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketLeft(g, x + 90, y + 33, 32, 32);
 		}
 		if(isFacing == 2 && this.f instanceof SpaceMarauder){
-			g.drawImage(Assets.Goliath11, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath9,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketRight(g, x + 30, y + 33, 32, 32);
 		}
 		if(isFacing == 1 && this.f instanceof SpaceMarauder){
-			g.drawImage(Assets.Goliath9, x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath11,(int) x + 10,(int) y, width, height, null);
 			//a.AnimateRocketDown(g, x + 42, y + 20, 32, 32);
 		}
 		if(isFacing == 0 && this.f instanceof SpaceMarauder){
-			g.drawImage(Assets.Goliath10,  x + 10, y, width, height, null);
+			g.drawImage(Assets.Goliath10,(int)  x + 10,(int) y, width, height, null);
 			//a.AnimateRocket(g, x + 45, y + 80, 32, 32);
 		}
 		if(animateReady){
@@ -461,8 +471,20 @@ public class Goliath extends EntityObject{
 		if(health <= 0){
 			setDeath(true);
 			Goliath.thisDeath = true;
-			a.AnimateExplosion(g, x, y, width, height);
-			
+			a.AnimateExplosion(g,(int) x,(int) y, width, height);
+			SoundLoader.loadSoundEffect("/Sound/Explosion.wav");
+			if(!claimKill && attacker != null){
+				if(this.attacker instanceof Player){
+					for(EntityObject p : h.entity){
+						p.setKills(1);
+						this.attacker = null;
+						claimKill = true;
+					}
+				}else{
+					attacker.setKills(1);
+					claimKill = true;
+				}
+			}
 			if(Animator.isFin[0]){
 				ra = r.nextInt(10);
 				
@@ -484,7 +506,7 @@ public class Goliath extends EntityObject{
 	
 	
 	public Rectangle getBounds() {
-		return new Rectangle(x + 50, y + 50, width - 100, height - 100);
+		return new Rectangle((int) x + 50,(int) y + 50, width - 100, height - 100);
 	}
 
 }

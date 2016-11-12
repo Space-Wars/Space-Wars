@@ -19,6 +19,7 @@ import com.rentarosato520.spacefighter.entity.misc.Meteor;
 import com.rentarosato520.spacefighter.entity.ships.Player;
 import com.rentarosato520.spacefighter.listeners.KeyInput;
 import com.rentarosato520.spacefighter.listeners.MouseInput;
+import com.rentarosato520.spacefigther.gameevents.AsteriodBelt;
 
 
 public class GameMain extends Canvas implements Runnable{
@@ -37,21 +38,12 @@ public class GameMain extends Canvas implements Runnable{
 	private SoundLoader l;
 	private Camera c;
 	private Player p;
+	private AsteriodBelt ab;
 	public static int SceneChange, pDeaths;
 	public static final int pTarget = 1, eTarget = 0, fTarget = 2, nTarget = 3, gTarget = 4;
-	public static int numFrames;
+	public static int numFrames, numEvents;
 	
-	public GameMain(){
-		r = new Random();
-		a = new Animator();
-		h = new Handler();
-		l = new SoundLoader();
-		c = new Camera(0, 0);
-		
-		//random spawn later
-		
-		p = new Player(Window.screensize.width/2, Window.screensize.height/2, 128, 128, ID.Player, h, c);
-		
+	public void worldGen(){
 		for(int i = 0; i < r.nextInt(20) + 5; i++){
 			if(r.nextInt(2) == 0){
 				h.addObject(new Meteor(r.nextInt(Window.screensize.width + 1100), r.nextInt(Window.screensize.height + 1200), r.nextInt(300)+300, r.nextInt(300)+300, ID.Meteor, h, 7));
@@ -59,6 +51,21 @@ public class GameMain extends Canvas implements Runnable{
 				h.addObject(new Meteor(r.nextInt(Window.screensize.width + 1100), -r.nextInt(Window.screensize.height + 1200), r.nextInt(300)+300, r.nextInt(300)+300, ID.Meteor, h, 7));
 			}
 		}
+		if(r.nextInt(100) <= 15){
+			ab = new AsteriodBelt(h);
+			this.numEvents++;
+			System.out.println("Event Type: Asteriod Betl");
+		}
+	}
+	
+	public GameMain(){
+		r = new Random();
+		a = new Animator();
+		h = new Handler();
+		l = new SoundLoader();
+		c = new Camera(0, 0);
+		//random spawn later
+		p = new Player(Window.screensize.width/2, Window.screensize.height/2, 128, 128, ID.Player, h, c);
 		
 		SceneChange = 0;
 		
@@ -75,9 +82,9 @@ public class GameMain extends Canvas implements Runnable{
 		this.addKeyListener(new KeyInput(h));
 		this.addMouseListener(mouse);
 		this.addMouseMotionListener(mouse);
-		
-		
 		new Window(this);
+		
+		worldGen();
 	}
 	
 	public void run() {
@@ -104,9 +111,10 @@ public class GameMain extends Canvas implements Runnable{
 			
 			if(System.currentTimeMillis() - timer > 1000){
 				timer += 1000;
-				System.out.println("FPS: " + frames);
+				//System.out.println("FPS: " + frames);
 				frames = 0;
 			}
+			//System.out.println(now+ " " +lasTime+ " " +delta+ " " +ns);
 		}
 		stop();
 	}
@@ -139,7 +147,7 @@ public class GameMain extends Canvas implements Runnable{
 				}
 			}
 			if(GameScene.getCurrentScene() instanceof GameSession){
-				scene.tick();
+				((GameSession) scene).tick(ab);
 			}
 		}
 	}
@@ -173,7 +181,7 @@ public class GameMain extends Canvas implements Runnable{
 		bs.show();
 	}
 	
-	public static boolean objectCollision(int ox, int ow,int varX){
+	public static boolean objectCollision(float ox, float ow,int varX){
 		if(varX >= ox && varX <= ox + ow){
 			return true;
 		}else{
@@ -182,6 +190,16 @@ public class GameMain extends Canvas implements Runnable{
 	}
 	
 	public static int clamp(int min, int max, int var){
+		if(var < min){
+			return var = min;
+		}
+		if(var > max){
+			return var = max;
+		}
+		return var;
+	}
+	
+	public static float clampF(float min, float max, float var){
 		if(var < min){
 			return var = min;
 		}

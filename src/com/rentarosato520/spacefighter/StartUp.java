@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.Random;
 
 import com.rentarosato520.spacefighter.asset.animation.Animator;
 import com.rentarosato520.spacefighter.asset.sound.SoundLoader;
@@ -16,6 +17,7 @@ public class StartUp extends GameScene{
 	boolean upMode = true;
 	boolean sideMode = true;
 	private Animator a;
+	private Random r;
 	private int scale;
 
 	
@@ -26,13 +28,23 @@ public class StartUp extends GameScene{
 		this.a = a;
 		this.scale = 40;
 		
+		this.r = new Random();
+		
 		this.isActive = active;
 		
-		new Thread(new Runnable(){
-			public void run(){
-				l.load("/Sound/SpaceBack.wav");
-			}
-		}).start();
+		if(r.nextInt(2) == 0){
+			new Thread(new Runnable(){
+				public void run(){
+					l.load("/Sound/SpaceBack.wav");
+				}
+			}).start();
+		}else{
+			new Thread(new Runnable(){
+				public void run(){
+					l.load("/Sound/PeaceLast.wav");
+				}
+			}).start();
+		}
 	}
 
 	public void render(Graphics g, Graphics2D g2d) {

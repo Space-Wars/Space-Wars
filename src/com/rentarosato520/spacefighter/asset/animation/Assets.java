@@ -17,6 +17,7 @@ public class Assets {
 	public static BufferedImage Goliath, Goliath1, Goliath2, Goliath3, Goliath8, Goliath9, Goliath10, Goliath11, Goliath4, Goliath5, Goliath6, Goliath7, DeathSpavager, DeathSpavager1, DeathSpavager2, DeathSpavager3;
 	public static BufferedImage StealthDrone, StealthDrone1, StealthDrone2, StealthDrone3, XBullet44, XBullet441, XBullet442, XBullet443;
 	public static BufferedImage ex, ex1, ex2, ex3, ex4, ex5, ex6, ex7, ex8, ex9, ex10;
+	public static BufferedImage com, com1, com2, com3;
 	
 	public static void load(){
 		SpriteLoader loader = new SpriteLoader();
@@ -43,6 +44,12 @@ public class Assets {
 		Sprite XBulNSheet = new Sprite(loader.load("/Models/Ships/XBullet44.png"));
 		Sprite BroadSheet = new Sprite(loader.load("/Models/Misc/Broadside.png"));
 		Sprite exSheet = new Sprite(loader.load("/Models/Misc/Explosion2.png"));
+		Sprite comSheet = new Sprite(loader.load("/Models/Ships/CommandShip.png"));
+		
+		com = comSheet.crop(0, 0, 32, 32, 32, 32);
+		com1 = comSheet.crop(1, 0, 32, 32, 32, 32);
+		com2 = comSheet.crop(2, 0, 32, 32, 32, 32);
+		com3 = comSheet.crop(3, 0, 32, 32, 32, 32);
 		
 		Broad = BroadSheet.crop(0, 0, 32, 32, 32, 32);
 
